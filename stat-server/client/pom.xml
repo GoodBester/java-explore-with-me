@@ -9,7 +9,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>explore-with-me-client</artifactId>
+    <artifactId>stats-client</artifactId>
 
     <properties>
         <maven.compiler.source>18</maven.compiler.source>
