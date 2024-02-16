@@ -89,7 +89,7 @@
         </dependency>
         <dependency>
             <groupId>ru.practicum.stats.server</groupId>
-            <artifactId>explore-with-me-dto</artifactId>
+            <artifactId>stats-dto</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
