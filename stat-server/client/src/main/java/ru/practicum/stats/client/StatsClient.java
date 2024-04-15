@@ -60,7 +60,7 @@ public class StatsClient extends BaseClient {
             mapped = Collections.emptyList();
         }
 
-        if(mapped.isEmpty()){
+        if (mapped.isEmpty()) {
             return 0L;
         } else {
             return mapped.get(0).getHits();
