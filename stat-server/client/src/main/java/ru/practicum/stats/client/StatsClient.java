@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.praktikum.stats.dto.NewHitDto;
+import ru.praktikum.stats.dto.model.NewHitDto;
 import ru.praktikum.stats.dto.model.StatDto;
 
 import java.time.LocalDateTime;
@@ -46,26 +46,6 @@ public class StatsClient extends BaseClient {
 
 
     public Long getStats(Long eventId) {
-//        Map<String, Object> parameters = Map.of(
-//                "start", LocalDateTime.now().minusYears(1000).format(date),
-//                "end", LocalDateTime.now().plusYears(1000).format(date),
-//                "uris", List.of("/events/" + eventId),
-//                "unique", true
-//        );
-//        ResponseEntity<Object> response = get("/stats?start={start}&end={end}&uris={uris}&unique={unique}", parameters);
-//        List<StatDto> mapped;
-//        if (response.hasBody()) {
-//            mapped = mapper.convertValue(response.getBody(), mapType);
-//        } else {
-//            mapped = Collections.emptyList();
-//        }
-//
-//        if(mapped.isEmpty()){
-//            return 0L;
-//        } else {
-//            return mapped.get(0).getHits();
-//        }
-
         Map<String, Object> parameters = Map.of(
                 "start", LocalDateTime.now().minusYears(1000).format(date),
                 "end", LocalDateTime.now().plusYears(1000).format(date),
@@ -73,11 +53,18 @@ public class StatsClient extends BaseClient {
                 "unique", true
         );
         ResponseEntity<Object> response = get("/stats?start={start}&end={end}&uris={uris}&unique={unique}", parameters);
+        List<StatDto> mapped;
+        if (response.hasBody()) {
+            mapped = mapper.convertValue(response.getBody(), mapType);
+        } else {
+            mapped = Collections.emptyList();
+        }
 
-        List<StatDto> viewStatsList = response.hasBody() ? mapper.convertValue(response.getBody(), mapType) : Collections.emptyList();
-        return viewStatsList != null && !viewStatsList.isEmpty() ? viewStatsList.get(0).getHits() : 0L;
-
-
+        if(mapped.isEmpty()){
+            return 0L;
+        } else {
+            return mapped.get(0).getHits();
+        }
     }
 
     public Map<Long, Long> getStatsForViews(Set<Long> uris) {
