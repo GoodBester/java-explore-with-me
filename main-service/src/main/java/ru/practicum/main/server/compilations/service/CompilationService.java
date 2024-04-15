@@ -1,10 +1,8 @@
 package ru.practicum.main.server.compilations.service;
 
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.main.server.compilations.dto.CompilationDto;
 import ru.practicum.main.server.compilations.dto.NewCompilationDto;
+import ru.practicum.main.server.compilations.dto.UpdateCompilationDto;
 
 import java.util.List;
 
@@ -17,5 +15,5 @@ public interface CompilationService {
 
     String deleteCompilation(Long compId);
 
-    CompilationDto updateCompilation(Long compId);
+    CompilationDto updateCompilation(Long compId, UpdateCompilationDto newCompilationDto);
 }

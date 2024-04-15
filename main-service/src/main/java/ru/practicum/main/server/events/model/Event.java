@@ -1,6 +1,9 @@
 package ru.practicum.main.server.events.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.practicum.main.server.categories.model.Category;
 import ru.practicum.main.server.users.model.User;
 

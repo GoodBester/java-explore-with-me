@@ -1,10 +1,6 @@
 package ru.practicum.main.server.error;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.http.HttpStatus;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -12,8 +8,9 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class ApiError {
-    private HttpStatus status;
+    private String status;
     private String reason;
     private String message;
     private LocalDateTime timestamp;

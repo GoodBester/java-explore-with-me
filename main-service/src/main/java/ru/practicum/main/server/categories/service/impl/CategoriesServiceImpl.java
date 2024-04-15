@@ -2,22 +2,21 @@ package ru.practicum.main.server.categories.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.events.EventException;
 import ru.practicum.main.server.categories.dto.CategoryDto;
 import ru.practicum.main.server.categories.dto.NewCategoryDto;
 import ru.practicum.main.server.categories.model.Category;
 import ru.practicum.main.server.categories.repository.CategoryRepository;
 import ru.practicum.main.server.categories.service.CategoriesService;
+import ru.practicum.main.server.error.exception.IncorrectValueException;
 import ru.practicum.main.server.error.exception.NotFoundException;
+import ru.practicum.main.server.events.repository.EventRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +24,8 @@ import java.util.stream.Collectors;
 public class CategoriesServiceImpl implements CategoriesService {
     private final ModelMapper mapper;
     private final CategoryRepository categoryRepository;
+
+    private final EventRepository eventRepository;
 
 
     @Override
@@ -40,21 +41,32 @@ public class CategoriesServiceImpl implements CategoriesService {
 
     @Override
     public CategoryDto addCategory(NewCategoryDto newCategoryDto) {
+        if (categoryRepository.existsByName(newCategoryDto.getName())) {
+            throw new IncorrectValueException(HttpStatus.CONFLICT, "Категория с именем " + newCategoryDto.getName() + " уже существует.");
+        }
         return mapper.map(categoryRepository.save(mapper.map(newCategoryDto, Category.class)), CategoryDto.class);
     }
 
     @Override
     public String deleteCategory(Long catId) {
+        if (eventRepository.existsByCategory_Id(catId)) {
+            throw new IncorrectValueException(HttpStatus.CONFLICT, "Ошибка. Категория содержит события.");
+        }
         categoryRepository.deleteById(catId);
         return "Категория удалена";
     }
 
     @Override
     public CategoryDto updateCategory(Long catId, NewCategoryDto newCategoryDto) {
-        Optional<Category> category = categoryRepository.findById(catId);
-        category.get().setName(newCategoryDto.getName());
-        categoryRepository.save(category.get());
-        return mapper.map(category.get(), CategoryDto.class);
+
+        Category category = categoryRepository.findById(catId)
+                .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Категория не найдена."));
+
+        if (!category.getName().equals(newCategoryDto.getName()) && categoryRepository.existsByName(newCategoryDto.getName())) {
+            throw new IncorrectValueException(HttpStatus.CONFLICT, "Категория с именем " + newCategoryDto.getName() + " уже существует.");
+        }
+        category.setName(newCategoryDto.getName());
+        return mapper.map(categoryRepository.save(category), CategoryDto.class);
 
     }
 }

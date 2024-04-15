@@ -1,13 +1,11 @@
 package ru.practicum.main.server.request.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ru.practicum.main.server.error.exception.IncorrectValueException;
 import ru.practicum.main.server.error.exception.NotFoundException;
-import ru.practicum.main.server.error.exception.UnsatisfactoryConditionException;
 import ru.practicum.main.server.error.exception.ValidationException;
 import ru.practicum.main.server.events.model.Event;
 import ru.practicum.main.server.events.model.State;
@@ -33,11 +31,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class RequestServiceImpl implements RequestService {
     private final UserRepository userRepository;
-
     private final EventRepository eventRepository;
 
     private final RequestRepository requestRepository;
-    private final ModelMapper mapper;
+    private final RequestConverter requestConverter;
 
 
     @Override
@@ -73,7 +70,7 @@ public class RequestServiceImpl implements RequestService {
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
         }
 
-        return mapper.map(requestRepository.save(request), RequestDto.class);
+        return requestConverter.convertToDto(requestRepository.save(request));
     }
 
     @Override
@@ -84,7 +81,7 @@ public class RequestServiceImpl implements RequestService {
         List<Request> requests = requestRepository.findAllByRequester_IdAndEvent_InitiatorIdNot(userId, userId);
 
         return requests.stream()
-                .map(r -> mapper.map(r, RequestDto.class))
+                .map(requestConverter::convertToDto)
                 .collect(Collectors.toList());
     }
 
@@ -107,7 +104,7 @@ public class RequestServiceImpl implements RequestService {
         }
         request.setStatus(RequestStatus.CANCELED);
 
-        return mapper.map(requestRepository.save(request), RequestDto.class);
+        return requestConverter.convertToDto(requestRepository.save(request));
     }
 
     @Override
@@ -121,7 +118,7 @@ public class RequestServiceImpl implements RequestService {
         List<Request> requests = requestRepository.findAllByEvent_Initiator_IdAndEvent_Id(userId, eventId);
 
         return requests.stream()
-                .map(r -> mapper.map(r, RequestDto.class))
+                .map(requestConverter::convertToDto)
                 .collect(Collectors.toList());
     }
 
@@ -134,10 +131,10 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Событие с ID [" + eventId + "] не найдено."));
 
         if (event.getParticipantLimit() == 0 && !event.getRequestModeration()) {
-            throw new UnsatisfactoryConditionException(HttpStatus.CONFLICT, "Подтверждение заявки не требуется.");
+            throw new IncorrectValueException(HttpStatus.CONFLICT, "Подтверждение заявки не требуется.");
         }
         if (event.getConfirmedRequests() >= event.getParticipantLimit()) {
-            throw new UnsatisfactoryConditionException(HttpStatus.CONFLICT, "Превышен лимит заявок.");
+            throw new IncorrectValueException(HttpStatus.CONFLICT, "Превышен лимит заявок.");
         }
 
         List<Long> requestIds = eventRequest.getRequestIds();
@@ -175,11 +172,11 @@ public class RequestServiceImpl implements RequestService {
         eventRepository.save(event);
 
         List<RequestDto> confirmedRequestDtos = confirmedRequests.stream()
-                .map(r -> mapper.map(r, RequestDto.class))
+                .map(requestConverter::convertToDto)
                 .collect(Collectors.toList());
 
         List<RequestDto> rejectedRequestDtos = rejectedRequests.stream()
-                .map(r -> mapper.map(r, RequestDto.class))
+                .map(requestConverter::convertToDto)
                 .collect(Collectors.toList());
 
         EventRequestStatusUpdateResult updateResult = new EventRequestStatusUpdateResult();

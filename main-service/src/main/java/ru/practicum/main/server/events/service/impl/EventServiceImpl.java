@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ru.practicum.main.server.categories.model.Category;
 import ru.practicum.main.server.categories.repository.CategoryRepository;
+import ru.practicum.main.server.error.exception.IncorrectValueException;
 import ru.practicum.main.server.error.exception.NotFoundException;
 import ru.practicum.main.server.error.exception.ValidationException;
 import ru.practicum.main.server.events.dto.EventFullDto;
@@ -45,7 +46,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private final StatsClient statsClient = new StatsClient("http://stat-server:9090", new RestTemplateBuilder());
+    private final StatsClient statsClient = new StatsClient("http://stats-server:9090", new RestTemplateBuilder());
 
 
     @Override
@@ -55,6 +56,9 @@ public class EventServiceImpl implements EventService {
 
         if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             throw new ValidationException(HttpStatus.CONFLICT, "Дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента");
+        }
+        if (newEventDto.getParticipantLimit() < 0) {
+            throw new ValidationException(HttpStatus.BAD_REQUEST, "Колличество участников не может быть отрицательным");
         }
         Category category = categoryRepository.findById(newEventDto.getCategory())
                 .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Категория с ID " + newEventDto.getCategory() + " не найдена."));
@@ -89,7 +93,7 @@ public class EventServiceImpl implements EventService {
                 event.setState(State.CANCELED);
             }
         } else {
-            throw new ValidationException(HttpStatus.FORBIDDEN, "Дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента");
+            throw new IncorrectValueException(HttpStatus.CONFLICT, "Событие не отменено или в состоянии модерации");
         }
 
         event.setAnnotation(Objects.requireNonNullElse(updateEventUserRequest.getAnnotation(), event.getAnnotation()));
@@ -128,7 +132,7 @@ public class EventServiceImpl implements EventService {
 
         if ((updateEventAdminRequest.getEventDate() != null)
                 && (updateEventAdminRequest.getEventDate().isBefore(LocalDateTime.now()))) {
-            throw new ValidationException(HttpStatus.CONFLICT, "дата начала изменяемого события должна быть не ранее чем за час от даты публикации.");
+            throw new ValidationException(HttpStatus.BAD_REQUEST, "дата начала изменяемого события должна быть не ранее чем за час от даты публикации.");
         }
 
         if (updateEventAdminRequest.getStateAction() != null) {
@@ -137,12 +141,12 @@ public class EventServiceImpl implements EventService {
                     event.setState(State.PUBLISHED);
                     event.setPublishedOn(LocalDateTime.now());
                 } else {
-                    throw new ValidationException(HttpStatus.CONFLICT, "Cобытие можно публиковать, только если оно в состоянии ожидания публикации.");
+                    throw new IncorrectValueException(HttpStatus.CONFLICT, "Cобытие можно публиковать, только если оно в состоянии ожидания публикации.");
                 }
             }
             if (updateEventAdminRequest.getStateAction() == StateActionAdmin.REJECT_EVENT) {
                 if (event.getState().equals(State.PUBLISHED)) {
-                    throw new ValidationException(HttpStatus.CONFLICT, "Cобытие можно отклонить, только если оно еще не опубликовано.");
+                    throw new IncorrectValueException(HttpStatus.CONFLICT, "Cобытие можно отклонить, только если оно еще не опубликовано.");
                 }
                 event.setState(State.CANCELED);
             }
@@ -204,12 +208,13 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        PageRequest pageRequest = PageRequest.of(from / size, size);
+        final PageRequest pageRequest = PageRequest.of(from / size, size,
+                org.springframework.data.domain.Sort.by(Sort.EVENT_DATE.equals(sort) ? "eventDate" : "views"));
 
-        List<Event> eventEntities = eventRepository.findAllByCategory_IdInAndPaidAndPublishedOnAfterAndPublishedOnBeforeAndAnnotationContainingIgnoreCase
-                (categoriesIds, paid, start, end, text, pageRequest);
+        List<Event> eventEntities = eventRepository.searchPublishedEvents(categoriesIds, paid, start, end, pageRequest)
+                .getContent();
 
-        statsClient.addHit("ewm-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
+        statsClient.addHit("ewm-service", request.getRequestURI(), request.getRemoteAddr());
 
         if (eventEntities.isEmpty()) {
             return Collections.emptyList();
@@ -243,7 +248,7 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toList());
         }
         List<State> stateList;
-        if(states == null){
+        if (states == null) {
             stateList = Collections.emptyList();
         } else {
             stateList = states.stream().map(State::valueOf).collect(Collectors.toList());
@@ -264,10 +269,10 @@ public class EventServiceImpl implements EventService {
         }
 
         if (!userIds.isEmpty() && !stateList.isEmpty() && !categories.isEmpty()) {
-            return getEventDtoListWithAllParameters(userIds, categories, stateList, start, end, pageRequest);
+            return getEventDtoListWithAllParameters(userIds, categories, stateList, start, end, pageRequest).stream().map(e -> mapper.map(e, EventFullDto.class)).collect(Collectors.toList());
         }
         if (userIds.isEmpty() && !categories.isEmpty()) {
-            return getEventDtoListWithAllParameters(userIds, categories, stateList, start, end, pageRequest);
+            return getEventDtoListWithAllParameters(userIds, categories, stateList, start, end, pageRequest).stream().map(e -> mapper.map(e, EventFullDto.class)).collect(Collectors.toList());
         } else {
             return new ArrayList<>();
         }
@@ -276,7 +281,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getAllEventByUser(Long userId, Integer from, Integer size) {
         userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND ,"Пользователь не найден."));
+                .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден."));
 
         return eventRepository.findAllByInitiator_Id(userId, PageRequest.of(from, size)).stream().map(event -> mapper.map(event, EventShortDto.class)).collect(Collectors.toList());
     }
@@ -299,11 +304,10 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdAndState(eventId, State.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Событие не найдено."));
 
-        statsClient.addHit(
+        Object o = statsClient.addHit(
                 "ewm-service",
                 httpRequest.getRequestURI(),
-                httpRequest.getRemoteAddr(),
-                LocalDateTime.now());
+                httpRequest.getRemoteAddr());
 
         Long views = statsClient.getStats(eventId);
 
@@ -318,7 +322,7 @@ public class EventServiceImpl implements EventService {
 
         List<EventFullDto> events = eventRepository.findAllByInitiator_IdInAndCategory_IdInAndStateInAndPublishedOnAfterAndPublishedOnBefore(userIds, categories,
                 stateList, start, end,
-                pageRequest);
+                pageRequest).stream().map(e -> mapper.map(e, EventFullDto.class)).collect(Collectors.toList());
 
         Set<Long> eventIds = events.stream().map(EventFullDto::getId).collect(Collectors.toSet());
 

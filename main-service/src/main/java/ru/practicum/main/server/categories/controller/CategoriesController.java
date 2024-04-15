@@ -2,11 +2,13 @@ package ru.practicum.main.server.categories.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main.server.categories.dto.CategoryDto;
 import ru.practicum.main.server.categories.dto.NewCategoryDto;
 import ru.practicum.main.server.categories.service.CategoriesService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -29,18 +31,20 @@ public class CategoriesController {
     }
 
     @PostMapping("/admin/categories")
-    public CategoryDto addCategory(@RequestBody NewCategoryDto newCategoryDto) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public CategoryDto addCategory(@Valid @RequestBody NewCategoryDto newCategoryDto) {
         return categoriesService.addCategory(newCategoryDto);
     }
 
-    @PostMapping("/admin/categories/{catId}")
+    @DeleteMapping("/admin/categories/{catId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public String deleteCategory(@PathVariable Long catId) {
         return categoriesService.deleteCategory(catId);
     }
 
     @PatchMapping("/admin/categories/{catId}")
     public CategoryDto updateCategory(@PathVariable Long catId,
-                                      @RequestBody NewCategoryDto newCategoryDto) {
+                                      @Valid @RequestBody NewCategoryDto newCategoryDto) {
         return categoriesService.updateCategory(catId, newCategoryDto);
     }
 }

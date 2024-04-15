@@ -1,7 +1,9 @@
 package ru.practicum.main.server.request.model;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.practicum.main.server.events.model.Event;
 import ru.practicum.main.server.users.model.User;
 
@@ -21,6 +23,7 @@ public class Request {
         this.requester = requester;
         this.status = status;
     }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

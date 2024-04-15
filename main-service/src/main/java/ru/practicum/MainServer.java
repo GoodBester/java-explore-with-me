@@ -15,6 +15,7 @@ public class MainServer {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
         return modelMapper;
     }
+
     public static void main(String[] args) {
         SpringApplication.run(MainServer.class, args);
     }

@@ -3,6 +3,7 @@ package ru.practicum.main.server.events.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main.server.events.dto.EventFullDto;
 import ru.practicum.main.server.events.dto.EventShortDto;
@@ -40,6 +41,7 @@ public class EventsController {
         return eventService.getAllEventPublic(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
                 sort, from, size, request);
     }
+
     @GetMapping("/admin/events")
     public List<EventFullDto> getAllEventAdmin(@RequestParam(name = "users", required = false) List<Long> userIds,
                                                @RequestParam(name = "states", required = false) List<String> states,
@@ -59,16 +61,17 @@ public class EventsController {
     }
 
     @GetMapping("/users/{userId}/events")
-    public List<EventShortDto> getUserEvents(@PathVariable Long id,
+    public List<EventShortDto> getUserEvents(@PathVariable Long userId,
                                              @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
                                              @RequestParam(required = false, defaultValue = "10") @Positive Integer size) {
-        return eventService.getAllEventByUser(id, from, size);
+        return eventService.getAllEventByUser(userId, from, size);
     }
 
     @PostMapping("/users/{userId}/events")
-    public EventFullDto addEvent(@PathVariable Long id,
-                                 @RequestBody NewEventDto newEventDto) {
-        return eventService.addEvent(id, newEventDto);
+    @ResponseStatus(HttpStatus.CREATED)
+    public EventFullDto addEvent(@PathVariable Long userId,
+                                 @Valid @RequestBody NewEventDto newEventDto) {
+        return eventService.addEvent(userId, newEventDto);
     }
 
     @GetMapping("/users/{userId}/events/{eventId}")
@@ -83,7 +86,8 @@ public class EventsController {
     }
 
     @PatchMapping("/admin/events/{eventId}")
-    public EventFullDto updateEventByAdmin(@PathVariable Long eventId, @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
+    public EventFullDto updateEventByAdmin(@PathVariable Long eventId,
+                                           @Valid @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
         return eventService.updateEventByAdmin(eventId, updateEventAdminRequest);
     }
 

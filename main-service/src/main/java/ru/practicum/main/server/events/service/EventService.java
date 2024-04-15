@@ -18,12 +18,12 @@ public interface EventService {
     EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updateEventAdminRequest);
 
     List<EventShortDto> getAllEventPublic(String text, List<Long> categoriesIds, Boolean paid, String rangeStart,
-                                     String rangeEnd, Boolean onlyAvailable, Sort sort, Integer from,
-                                     Integer size, HttpServletRequest request);
+                                          String rangeEnd, Boolean onlyAvailable, Sort sort, Integer from,
+                                          Integer size, HttpServletRequest request);
 
     List<EventFullDto> getAllEventAdmin(List<Long> userIds, List<String> states, List<Long> categories,
-                                   String rangeStart, String rangeEnd, Integer from, Integer size,
-                                   HttpServletRequest request);
+                                        String rangeStart, String rangeEnd, Integer from, Integer size,
+                                        HttpServletRequest request);
 
     List<EventShortDto> getAllEventByUser(Long userId, Integer from, Integer size);
 

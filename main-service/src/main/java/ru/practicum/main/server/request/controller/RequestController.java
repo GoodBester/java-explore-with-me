@@ -2,13 +2,13 @@ package ru.practicum.main.server.request.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main.server.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.main.server.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.main.server.request.dto.RequestDto;
 import ru.practicum.main.server.request.service.RequestService;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -33,8 +33,9 @@ public class RequestController {
     }
 
     @PostMapping("/users/{userId}/requests")
+    @ResponseStatus(HttpStatus.CREATED)
     public RequestDto create(@PathVariable(name = "userId") Long userId,
-                             @Valid @RequestParam(name = "eventId") Long eventId) {
+                             @RequestParam(name = "eventId") Long eventId) {
 
         return requestService.create(userId, eventId);
     }

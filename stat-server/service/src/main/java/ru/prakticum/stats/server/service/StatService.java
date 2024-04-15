@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.prakticum.stats.server.model.Hit;
 import ru.prakticum.stats.server.repository.HitRepository;
 import ru.praktikum.stats.dto.model.HitDto;
+import ru.praktikum.stats.dto.model.NewHitDto;
 import ru.praktikum.stats.dto.model.StatDto;
 
 import javax.validation.ValidationException;
@@ -25,7 +26,7 @@ public class StatService {
     private final ModelMapper mapper;
     public static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public HitDto addHit(HitDto hit) {
+    public HitDto addHit(NewHitDto hit) {
         Hit ent = mapper.map(hit, Hit.class);
         return mapper.map(hitRepository.save(ent), HitDto.class);
     }
@@ -45,9 +46,15 @@ public class StatService {
         }
 
         if (uris != null && !uris.isEmpty()) {
+            uris.replaceAll(s -> s.replace("[", ""));
+            uris.replaceAll(s -> s.replace("]", ""));
             if (unique) {
+                uris.replaceAll(s -> s.replace("[", ""));
+                uris.replaceAll(s -> s.replace("]", ""));
                 return hitRepository.getStatsByUrisWithUniqueIp(startDate, endDate, uris);
             } else {
+                uris.replaceAll(s -> s.replace("[", ""));
+                uris.replaceAll(s -> s.replace("]", ""));
                 return hitRepository.getStatsByUrisWithoutUniqueIp(startDate, endDate, uris);
             }
         }

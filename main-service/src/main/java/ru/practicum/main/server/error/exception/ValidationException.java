@@ -1,11 +1,10 @@
 package ru.practicum.main.server.error.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
-public class ValidationException extends ResponseStatusException {
+public class ValidationException extends RuntimeException {
 
     public ValidationException(HttpStatus badRequest, final String message) {
-        super(badRequest, message);
+        super();
     }
 }

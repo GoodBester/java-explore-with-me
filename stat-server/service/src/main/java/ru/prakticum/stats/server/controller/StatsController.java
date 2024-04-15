@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.prakticum.stats.server.service.StatService;
 import ru.praktikum.stats.dto.model.HitDto;
+import ru.praktikum.stats.dto.model.NewHitDto;
 import ru.praktikum.stats.dto.model.StatDto;
 
 import java.time.LocalDateTime;
@@ -18,7 +19,7 @@ public class StatsController {
 
 
     @PostMapping("/hit")
-    public HitDto addHit(@RequestBody HitDto hit) {
+    public HitDto addHit(@RequestBody NewHitDto hit) {
         hit.setTimestamp(LocalDateTime.now());
         return statService.addHit(hit);
     }
