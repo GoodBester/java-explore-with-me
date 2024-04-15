@@ -1,6 +1,9 @@
-package ru.practicum.main.server.error;
+package ru.prakticum.stats.server.exception;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -8,7 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiError {
+public class ErrorResponce {
     private String status;
     private String reason;
     private String message;

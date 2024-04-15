@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.prakticum.stats.server.exception.ValidationException;
 import ru.prakticum.stats.server.model.Hit;
 import ru.prakticum.stats.server.repository.HitRepository;
 import ru.praktikum.stats.dto.model.HitDto;
 import ru.praktikum.stats.dto.model.NewHitDto;
 import ru.praktikum.stats.dto.model.StatDto;
 
-import javax.validation.ValidationException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -42,7 +42,7 @@ public class StatService {
             throw new ValidationException("Incorrect date format.");
         }
         if (startDate.isAfter(endDate)) {
-            throw new ValidationException("Start and end times are not correct.");
+            throw new ru.prakticum.stats.server.exception.ValidationException("Start and end times are not correct.");
         }
 
         if (uris != null && !uris.isEmpty()) {
