@@ -20,8 +20,8 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>ru.practicum.stats.dto</groupId>
-            <artifactId>explore-with-me-dto</artifactId>
+            <groupId>ru.practicum.stats.server</groupId>
+            <artifactId>stats-dto</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
