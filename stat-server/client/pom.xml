@@ -23,6 +23,7 @@
             <groupId>ru.practicum.stats.dto</groupId>
             <artifactId>explore-with-me-dto</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -48,11 +49,6 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.15.2</version>
-        </dependency>
-        <dependency>
-            <groupId>ru.practicum.stats.server</groupId>
-            <artifactId>explore-with-me-dto</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>
