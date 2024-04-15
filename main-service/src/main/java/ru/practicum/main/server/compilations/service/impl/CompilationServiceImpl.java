@@ -34,9 +34,8 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     @Transactional(readOnly = true)
     public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
-        return compilationRepository.findAllByPinned(pinned,
-                        PageRequest.of(from / size, size, Sort.by("id"))).stream().
-                map(compilation -> mapper.map(compilation, CompilationDto.class)).collect(Collectors.toList());
+        return compilationRepository.findAllByPinned(pinned, PageRequest.of(from / size, size, Sort.by("id"))).stream()
+                .map(compilation -> mapper.map(compilation, CompilationDto.class)).collect(Collectors.toList());
     }
 
     @Override

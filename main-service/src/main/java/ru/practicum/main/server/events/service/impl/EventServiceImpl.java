@@ -236,9 +236,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventFullDto> getAllEventAdmin
-            (List<Long> userIds, List<String> states, List<Long> categories, String rangeStart, String
-                    rangeEnd, Integer from, Integer size, HttpServletRequest request) {
+    public List<EventFullDto> getAllEventAdmin(List<Long> userIds, List<String> states, List<Long> categories, String rangeStart,
+                                               String rangeEnd, Integer from, Integer size, HttpServletRequest request) {
         final PageRequest pageRequest = PageRequest.of(from / size, size);
 
         if (states == null && rangeStart == null && rangeEnd == null) {

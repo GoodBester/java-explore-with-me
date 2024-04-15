@@ -9,11 +9,11 @@ public interface CategoriesService {
 
     List<CategoryDto> getCategories(Integer from, Integer size);
 
-    CategoryDto getCategory(Long CatId);
+    CategoryDto getCategory(Long catId);
 
     CategoryDto addCategory(NewCategoryDto newCategoryDto);
 
-    String deleteCategory(Long CatId);
+    String deleteCategory(Long catId);
 
     CategoryDto updateCategory(Long catId, NewCategoryDto newCategoryDto);
 }
