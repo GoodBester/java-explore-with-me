@@ -46,7 +46,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private final StatsClient statsClient = new StatsClient("http://localhost:9090", new RestTemplateBuilder());
+    private final StatsClient statsClient = new StatsClient("http://stats-server:9090", new RestTemplateBuilder());
 
 
     @Override
