@@ -49,12 +49,8 @@ public class StatService {
             uris.replaceAll(s -> s.replace("[", ""));
             uris.replaceAll(s -> s.replace("]", ""));
             if (unique) {
-                uris.replaceAll(s -> s.replace("[", ""));
-                uris.replaceAll(s -> s.replace("]", ""));
                 return hitRepository.getStatsByUrisWithUniqueIp(startDate, endDate, uris);
             } else {
-                uris.replaceAll(s -> s.replace("[", ""));
-                uris.replaceAll(s -> s.replace("]", ""));
                 return hitRepository.getStatsByUrisWithoutUniqueIp(startDate, endDate, uris);
             }
         }

@@ -21,9 +21,6 @@ public class RequestConverter {
         modelMapper.createTypeMap(Request.class, RequestDto.class)
                 .addMappings(mapper -> mapper.using(userLongConverter).map(Request::getRequester, RequestDto::setRequester))
                 .addMappings(mapper -> mapper.using(eventLongConverter).map(Request::getEvent, RequestDto::setEvent));
-
-
-
     }
 
     public RequestDto convertToDto(Request entity) {

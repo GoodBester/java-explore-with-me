@@ -10,7 +10,7 @@ public interface UserService {
 
     UserDto createUser(NewUserDto userDto);
 
-    String deleteUser(Long userId);
+    void deleteUser(Long userId);
 
     List<UserDto> findAllUsers(List<Long> ids, Pageable pageable);
 }

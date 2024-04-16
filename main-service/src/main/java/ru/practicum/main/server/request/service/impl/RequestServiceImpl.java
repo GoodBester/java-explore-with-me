@@ -53,12 +53,11 @@ public class RequestServiceImpl implements RequestService {
         if (requests.isPresent()) {
             throw new IncorrectValueException(HttpStatus.CONFLICT, "Ошибка. Запрос был отправлен ранее.");
         }
-        if (!(event.getState().equals(State.PUBLISHED))) {
+        if (!event.getState().equals(State.PUBLISHED)) {
             throw new IncorrectValueException(HttpStatus.CONFLICT, "Ошибка. Событие не опубликовано.");
         }
-        int limit = event.getParticipantLimit();
-        if (limit != 0) {
-            if (limit == event.getConfirmedRequests()) {
+        if (event.getParticipantLimit() != 0) {
+            if (event.getParticipantLimit().longValue() == event.getConfirmedRequests()) {
                 throw new IncorrectValueException(HttpStatus.CONFLICT, "Ошибка. Достигнут лимит запросов на участие.");
             }
         } else {
@@ -75,8 +74,9 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestDto> getCurrentUserRequests(Long userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден."));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден.");
+        }
 
         List<Request> requests = requestRepository.findAllByRequester_IdAndEvent_InitiatorIdNot(userId, userId);
 
@@ -87,8 +87,9 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public RequestDto cancel(Long userId, Long requestId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден."));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден.");
+        }
 
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Заявка не найдена."));
@@ -109,11 +110,13 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestDto> getRequestsByUserOfEvent(Long userId, Long eventId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден."));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден.");
+        }
 
-        eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Событие не найдено."));
+        if (!eventRepository.existsById(eventId)) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Событие не найдено.");
+        }
 
         List<Request> requests = requestRepository.findAllByEvent_Initiator_IdAndEvent_Id(userId, eventId);
 
@@ -124,8 +127,9 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public EventRequestStatusUpdateResult updateRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest eventRequest) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь с ID [" + userId + "] не найден."));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден.");
+        }
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Событие с ID [" + eventId + "] не найдено."));

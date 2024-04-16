@@ -10,8 +10,8 @@ import ru.practicum.main.server.events.dto.EventShortDto;
 import ru.practicum.main.server.events.dto.NewEventDto;
 import ru.practicum.main.server.events.model.Sort;
 import ru.practicum.main.server.events.service.EventService;
-import ru.practicum.main.server.request.dto.UpdateEventAdminRequest;
-import ru.practicum.main.server.request.dto.UpdateEventUserRequest;
+import ru.practicum.main.server.events.dto.UpdateEventAdminRequest;
+import ru.practicum.main.server.events.dto.UpdateEventUserRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -90,5 +90,4 @@ public class EventsController {
                                            @Valid @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
         return eventService.updateEventByAdmin(eventId, updateEventAdminRequest);
     }
-
 }

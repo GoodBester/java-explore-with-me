@@ -48,12 +48,11 @@ public class CategoriesServiceImpl implements CategoriesService {
     }
 
     @Override
-    public String deleteCategory(Long catId) {
+    public void deleteCategory(Long catId) {
         if (eventRepository.existsByCategory_Id(catId)) {
             throw new IncorrectValueException(HttpStatus.CONFLICT, "Ошибка. Категория содержит события.");
         }
         categoryRepository.deleteById(catId);
-        return "Категория удалена";
     }
 
     @Override

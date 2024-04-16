@@ -4,8 +4,8 @@ import ru.practicum.main.server.events.dto.EventFullDto;
 import ru.practicum.main.server.events.dto.EventShortDto;
 import ru.practicum.main.server.events.dto.NewEventDto;
 import ru.practicum.main.server.events.model.Sort;
-import ru.practicum.main.server.request.dto.UpdateEventAdminRequest;
-import ru.practicum.main.server.request.dto.UpdateEventUserRequest;
+import ru.practicum.main.server.events.dto.UpdateEventAdminRequest;
+import ru.practicum.main.server.events.dto.UpdateEventUserRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;

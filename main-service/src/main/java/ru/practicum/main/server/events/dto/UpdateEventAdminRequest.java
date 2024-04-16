@@ -1,20 +1,15 @@
 package ru.practicum.main.server.events.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 import ru.practicum.main.server.events.model.Location;
 import ru.practicum.main.server.request.model.StateActionAdmin;
 
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
+
+@Data
 public class UpdateEventAdminRequest {
     @Size(min = 20, max = 2000)
     private String annotation;

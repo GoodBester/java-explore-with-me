@@ -38,8 +38,8 @@ public class CategoriesController {
 
     @DeleteMapping("/admin/categories/{catId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public String deleteCategory(@PathVariable Long catId) {
-        return categoriesService.deleteCategory(catId);
+    public void deleteCategory(@PathVariable Long catId) {
+        categoriesService.deleteCategory(catId);
     }
 
     @PatchMapping("/admin/categories/{catId}")

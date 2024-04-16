@@ -39,8 +39,8 @@ public class CompilationController {
 
     @DeleteMapping("admin/compilations/{compId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public String deleteCompilation(@PathVariable Long compId) {
-        return compilationService.deleteCompilation(compId);
+    public void deleteCompilation(@PathVariable Long compId) {
+        compilationService.deleteCompilation(compId);
     }
 
     @PatchMapping("admin/compilations/{compId}")

@@ -22,8 +22,8 @@ import ru.practicum.main.server.events.model.State;
 import ru.practicum.main.server.events.repository.EventRepository;
 import ru.practicum.main.server.events.repository.LocationRepository;
 import ru.practicum.main.server.events.service.EventService;
-import ru.practicum.main.server.request.dto.UpdateEventAdminRequest;
-import ru.practicum.main.server.request.dto.UpdateEventUserRequest;
+import ru.practicum.main.server.events.dto.UpdateEventAdminRequest;
+import ru.practicum.main.server.events.dto.UpdateEventUserRequest;
 import ru.practicum.main.server.request.model.StateActionAdmin;
 import ru.practicum.main.server.request.model.StateActionUser;
 import ru.practicum.main.server.users.model.User;
@@ -46,7 +46,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private final StatsClient statsClient = new StatsClient("http://stats-server:9090", new RestTemplateBuilder());
+    private final StatsClient statsClient = new StatsClient("http://localhost:9090", new RestTemplateBuilder());
 
 
     @Override
@@ -78,8 +78,9 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Событие не найдено."));
 
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден."));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден.");
+        }
 
         if (event.getState().equals(State.CANCELED) || event.getState().equals(State.PENDING)) {
             if (updateEventUserRequest.getEventDate() != null && updateEventUserRequest.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
@@ -279,19 +280,21 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getAllEventByUser(Long userId, Integer from, Integer size) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден."));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден.");
+        }
 
         return eventRepository.findAllByInitiator_Id(userId, PageRequest.of(from, size)).stream().map(event -> mapper.map(event, EventShortDto.class)).collect(Collectors.toList());
     }
 
     @Override
     public EventFullDto getEventByUser(Long userId, Long eventId) {
-
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден."));
-        eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Событие не найдено."));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден.");
+        }
+        if (!eventRepository.existsById(eventId)) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Событие не найдено.");
+        }
 
         return mapper.map(eventRepository.findByIdAndInitiator_Id(eventId, userId)
                 .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Событие не существует.")), EventFullDto.class);
@@ -303,10 +306,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdAndState(eventId, State.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Событие не найдено."));
 
-        Object o = statsClient.addHit(
-                "ewm-service",
-                httpRequest.getRequestURI(),
-                httpRequest.getRemoteAddr());
+        statsClient.addHit("ewm-service", httpRequest.getRequestURI(), httpRequest.getRemoteAddr());
 
         Long views = statsClient.getStats(eventId);
 

@@ -60,11 +60,11 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public String deleteCompilation(Long compId) {
-        compilationRepository.findById(compId)
-                .orElseThrow(() -> new NotFoundException(HttpStatus.NOT_FOUND, "Подборка не найдена или недоступна"));
+    public void deleteCompilation(Long compId) {
+        if (!compilationRepository.existsById(compId)) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "Подборка не найдена или недоступна");
+        }
         compilationRepository.deleteById(compId);
-        return "Подборка удалена";
     }
 
     @Override

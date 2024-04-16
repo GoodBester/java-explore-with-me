@@ -13,7 +13,7 @@ public interface CompilationService {
 
     CompilationDto addCompilation(NewCompilationDto newCompilationDto);
 
-    String deleteCompilation(Long compId);
+    void deleteCompilation(Long compId);
 
     CompilationDto updateCompilation(Long compId, UpdateCompilationDto newCompilationDto);
 }
