@@ -15,48 +15,38 @@ public class BaseClient {
         this.rest = rest;
     }
 
-    protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> parameters) {
-        return makeAndSendRequest(HttpMethod.GET, path, null, parameters, null);
-    }
-
     protected <T> ResponseEntity<Object> post(String path, T body) {
-        return post(path, null, null, body);
+        return makeAndSendRequest(HttpMethod.POST, path, null, body);
     }
 
-    protected <T> ResponseEntity<Object> post(String path, Long userId, @Nullable Map<String, Object> parameters, T body) {
-        return makeAndSendRequest(HttpMethod.POST, path, userId, parameters, body);
+    protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> parameters) {
+        return makeAndSendRequest(HttpMethod.GET, path, parameters, null);
     }
 
+    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path,
+                                                          @Nullable Map<String, Object> parameters,
+                                                          @Nullable T body) {
 
-    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, Long userId, @Nullable Map<String, Object> parameters, @Nullable T body) {
-        HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeaders());
+        HttpEntity<Object> requestEntity = new HttpEntity<>(body, defaultHeaders());
 
-        ResponseEntity<Object> serverResponse;
+        ResponseEntity<Object> statsServerResponse;
+
         try {
             if (parameters != null) {
-                serverResponse = rest.exchange(path, method, requestEntity, Object.class, parameters);
+                statsServerResponse = rest.exchange(path, method, requestEntity, Object.class, parameters);
             } else {
-                serverResponse = rest.exchange(path, method, requestEntity, Object.class);
+                statsServerResponse = rest.exchange(path, method, requestEntity, Object.class);
             }
         } catch (HttpStatusCodeException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
         }
-        return prepareGatewayResponse(serverResponse);
+        return prepareStatsClientResponse(statsServerResponse);
     }
 
-    private HttpHeaders defaultHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-
-        return headers;
-    }
-
-    private ResponseEntity<Object> prepareGatewayResponse(ResponseEntity<Object> response) {
+    private static ResponseEntity<Object> prepareStatsClientResponse(ResponseEntity<Object> response) {
         if (response.getStatusCode().is2xxSuccessful()) {
             return response;
         }
-
         ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(response.getStatusCode());
 
         if (response.hasBody()) {
@@ -64,5 +54,12 @@ public class BaseClient {
         }
 
         return responseBuilder.build();
+    }
+
+    private static HttpHeaders defaultHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        return headers;
     }
 }

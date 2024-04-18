@@ -19,14 +19,14 @@ public class Hit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    Long id;
+    private Long id;
     @Column(name = "app", nullable = false)
-    String app;
+    private String app;
     @Column(name = "uri", nullable = false)
-    String uri;
+    private String uri;
     @Column(name = "ip", nullable = false)
-    String ip;
+    private String ip;
     @Column(name = "timestamp")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    LocalDateTime timestamp;
+    private LocalDateTime timestamp;
 }

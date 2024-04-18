@@ -4,12 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.prakticum.stats.server.exception.ValidationException;
 import ru.prakticum.stats.server.model.Hit;
 import ru.prakticum.stats.server.repository.HitRepository;
 import ru.praktikum.stats.dto.model.HitDto;
+import ru.praktikum.stats.dto.model.NewHitDto;
 import ru.praktikum.stats.dto.model.StatDto;
 
-import javax.validation.ValidationException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -25,7 +26,7 @@ public class StatService {
     private final ModelMapper mapper;
     public static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public HitDto addHit(HitDto hit) {
+    public HitDto addHit(NewHitDto hit) {
         Hit ent = mapper.map(hit, Hit.class);
         return mapper.map(hitRepository.save(ent), HitDto.class);
     }
@@ -41,10 +42,12 @@ public class StatService {
             throw new ValidationException("Incorrect date format.");
         }
         if (startDate.isAfter(endDate)) {
-            throw new ValidationException("Start and end times are not correct.");
+            throw new ru.prakticum.stats.server.exception.ValidationException("Start and end times are not correct.");
         }
 
         if (uris != null && !uris.isEmpty()) {
+            uris.replaceAll(s -> s.replace("[", ""));
+            uris.replaceAll(s -> s.replace("]", ""));
             if (unique) {
                 return hitRepository.getStatsByUrisWithUniqueIp(startDate, endDate, uris);
             } else {
